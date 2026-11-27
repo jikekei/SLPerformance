@@ -24,7 +24,7 @@ namespace SLPerformance.Profiler;
 /// On-demand, zero-conflict read-only timing & Mono allocation probes for LateUpdate and Update breakdown.
 /// Installed ONLY while `slperf probes on` is active and completely unpatched on `slperf probes off`
 /// so production overhead is strictly zero when disabled.
-/// Never skips original methods, never modifies arguments/returns, and never touches SimpleAntiCheat-patched targets.
+/// Never skips original methods or modifies arguments or return values.
 /// </summary>
 public static class ProfilerProbeHooks
 {

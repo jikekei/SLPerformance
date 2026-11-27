@@ -41,7 +41,7 @@
 | **10 人服务器** | 真实玩家 / Dummy | Baseline / SLPerf | — | — | — | — | — | — | — | — | — | — | `UNVERIFIED` |
 | **20 人服务器** | 真实玩家 / Dummy | Baseline / SLPerf | — | — | — | — | — | — | — | — | — | — | `UNVERIFIED` |
 | **40 人服务器** | 真实玩家 / Dummy | Baseline / SLPerf | — | — | — | — | — | — | — | — | — | — | `UNVERIFIED` |
-| **48 人服务器** | 实机 48/48（`Players=49, MirrorConns=2`，含 `SimpleAntiCheat` + 47 Dummy，SLPerf 默认 15 模块） | SLPerf Tier 1+2 (15/17) | `59.92` | `16.69` | `16.68` | `16.88` | `21.58` | `71.7%` (`MeanWork=11.95ms, P99=15.68ms`) | `96.9%` (1核=100%) | 裁剪(`0.00KB`)/待新版统计 | `61/61/61` | 未开 netstats | **实机已测（含 Dummy，缺原版 Baseline 对照）** |
+| **48 人服务器** | 实机 48/48（`Players=49, MirrorConns=2`，含 47 Dummy，SLPerf 默认 15 模块） | SLPerf Tier 1+2 (15/17) | `59.92` | `16.69` | `16.68` | `16.88` | `21.58` | `71.7%` (`MeanWork=11.95ms, P99=15.68ms`) | `96.9%` (1核=100%) | 裁剪(`0.00KB`)/待新版统计 | `61/61/61` | 未开 netstats | **实机已测（含 Dummy，缺原版 Baseline 对照）** |
 | **48 人服务器 (OPT-16 消融)** | 同上 + 开启 `physics.fpc_spherecast_batch` (16/17) | SLPerf + OPT-16 | `59.92` | `16.69` | `16.68` | `17.03` | `20.98` | `70.9%` (`MeanWork=11.82ms, P99=15.92ms`) | `118.7%` (1核=100%) | 裁剪(`0.00KB`)/待新版统计 | `17/17/17` (56s内，每3.3s一次) | 未开 netstats | **实机已测（证明 OPT-16 主线程仅省 0.13ms 但总 CPU +21.8%，不建议常开）** |
 | **60 人服务器** | 真实玩家 / Dummy | Baseline / SLPerf | — | — | — | — | — | — | — | — | — | — | `UNVERIFIED` |
 
@@ -103,7 +103,7 @@
 
 ## 5. 真实 SCP:SL 14.2.9 专用服务端 48/48 满载现场实测记录（2026-11-27）
 
-测试环境：SCP:SL Dedicated Server `14.2.9`（Unity `6000.0.43f1`，LabAPI `1.1.7.0`，16 核 CPU，目标 `MirrorActualTPS = 60`），在线 **48/48**（`Players=49`，`MirrorConns=2`：1 本地 Host + 1 真人 + 47 Dummy，`SpawnedNetIds ~ 1,514–1,553`），同服混跑 `SimpleAntiCheat`、`HintServiceMeow`、`TextChatMeow`、`ProjectMER`、`Server Maid.LabApi`、`ServerTpsLogger`。
+测试环境：SCP:SL Dedicated Server `14.2.9`（Unity `6000.0.43f1`，LabAPI `1.1.7.0`，16 核 CPU，目标 `MirrorActualTPS = 60`），在线 **48/48**（`Players=49`，`MirrorConns=2`：1 本地 Host + 1 真人 + 47 Dummy，`SpawnedNetIds ~ 1,514–1,553`），同服混跑 `HintServiceMeow`、`TextChatMeow`、`ProjectMER`、`Server Maid.LabApi`、`ServerTpsLogger`。
 
 ### 5.1 三轮实测演进对比（均取 2,048 帧满载稳态窗口）
 
@@ -131,4 +131,4 @@
 2. **`OPT-16`（`physics.fpc_spherecast_batch`）—— 48p 下低 ROI（维持默认关闭）**：
    - 开启 `OPT-11` 后，再单开 `OPT-16` 使 48/48 `MainThread Work` 仅降 `0.13ms`（`11.95ms -> 11.82ms`），但 `ProcessCPU` 上升 `+21.8%`（`96.9% -> 118.7%`）。证实 Tier 3 维持默认关闭决策正确。
 3. **测试边界透明声明**：
-   - 上述 48/48 现场数据包含 47 个 `DummyNetworkConnection`；其中 `OPT-02` 跳过 Dummy 无效封包序列化贡献了约 `-90 KB/帧` GC 与部分 `LateUpdate` 耗时；而 `OPT-18`/`OPT-19`/`OPT-20`/`OPT-13`/`OPT-14`/`OPT-09` 及 `OPT-02` 共存模式 `GetNewSyncData` 缓存对 **48 真人连接服**同样全额有效。在全真人 48–60p 网络满载场景下的端到端带宽与 `SimpleAntiCheat` 共存负载仍建议在生产高峰期二次观察 `slperf stats` 与 `slperf netstats on`。
+   - 上述 48/48 现场数据包含 47 个 `DummyNetworkConnection`；其中 `OPT-02` 跳过 Dummy 无效封包序列化贡献了约 `-90 KB/帧` GC 与部分 `LateUpdate` 耗时；而 `OPT-18`/`OPT-19`/`OPT-20`/`OPT-13`/`OPT-14`/`OPT-09` 及 `OPT-02` 共存模式 `GetNewSyncData` 缓存对 **48 真人连接服**同样全额有效。在全真人 48–60p 网络满载场景下的端到端带宽仍建议在生产高峰期二次观察 `slperf stats` 与 `slperf netstats on`。

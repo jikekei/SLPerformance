@@ -58,13 +58,5 @@
 | **EXILED 框架** | `Exiled.Events.dll` | EXILED 大量使用 Harmony Transpiler 注入 `Assembly-CSharp`（如 `FpcServerPositionDistributor`、`VoiceTransceiver`、`Scp173ObserversTracker`、`DoorVariant`） | **关键防冲突机制**：在 `SLPerformance.Compatibility` 中通过 `Harmony.GetPatchInfo(method)` 检测目标方法是否已被其他插件打了 Transpiler 或 Prefix；对存在冲突的模块自动输出告警并支持按配置降级（例如当 EXILED 已 Transpile `WriteAll` 时，自动避让或切换为仅优化其内部无冲突子方法 `GetVisibleRole` / `FpcSyncData`！） |
 | **自定义地图 / 建筑插件** | MapEditorReborn / AdminToy 建筑类插件 | 生成数千 `AdminToyBase`（可能动态修改 Transform 而未设 `IsStatic`） | `OPT-03`（Mirror 脏广播）将极大提升此类服性能；`OPT-14` 仅休眠显式 `IsStatic == true` 的 Toy，不误伤动态移动建筑 |
 | **音频播放插件** | `AudioPlayerApi` / `SCPSLAudioApi` | 通过 `SpeakerToy` / `AudioMessage` 或 `VoiceMessage` 发送音频 | `OPT-05` 保持 `VoiceMessage` 完整协议与 `OnVoiceMessageReceiving` 回调；`AudioMessage` 不受影响 |
-| **反作弊插件** | `SimpleAntiCheat` / `PDAC` | 监听移动包、射线检测、视野或 Hook `FpcMotor` / `FpcServerPositionDistributor` | 严禁绕过或修改任何位置覆盖、速度校验、速率限制与预鉴权逻辑；遇到同方法 Harmony 冲突时通过 `Compatibility` 模块安全协调 |
+| **反作弊插件** | `PDAC` | 监听移动包、射线检测、视野或 Hook `FpcMotor` / `FpcServerPositionDistributor` | 严禁绕过或修改任何位置覆盖、速度校验、速率限制与预鉴权逻辑；遇到同方法 Harmony 冲突时通过 `Compatibility` 模块安全协调 |
 | **HUD / Hint 插件** | `HintServiceMeow` | 高频向玩家发送 `HintMessage`（走 Mirror `NetworkConnection.Send`） | `OPT-10`（Batcher 零拷贝）与 `OPT-04`（直连 Poll）透明加速此类高频网络消息 |
-
-### 实机实测共存记录（2026-11-27）
-- **`SimpleAntiCheat` (`SimpleAntiCheat-*`)**：已在实机启动日志确认其对 `FpcServerPositionDistributor.WriteAll` 与 `FpcMotor.Move` 施加了 Harmony 补丁。
-  - `SLPerformance` 自动以 `LoadPriority.Lowest` 后置检测，**绝不覆盖、绕过或削弱反作弊补丁**；
-  - `net.fpc_distributor_fast` (`OPT-02`) 自动切换至**安全共存降级模式**：完整保留 `WriteAll` 与 `LateUpdate` 给 `SimpleAntiCheat`，同时启用无冲突的 `GetVisibleRole` 快速短路与 `PreviouslySent` 断线内存泄漏修复；
-  - `physics.fpc_motor_fastpath` (`OPT-11`) 自动以 **2/3 共存模式** 运行：保留 `FpcMotor.Move` 给 `SimpleAntiCheat`，同时启用 `FpcMotor.UpdatePosition` 静止跳过地面射线与 `FpcMouseLook.UpdateRotation` 专服快速路径；
-  - 其余 13 项默认开启模块与 `SimpleAntiCheat` 无冲突，全部正常激活。
-  - **注意**：切勿为了强行启用 `WriteAll` / `Move` 补丁而将 `auto_skip_on_harmony_conflict` 设为 `false`，否则可能干扰反作弊检测逻辑。

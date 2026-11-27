@@ -103,9 +103,7 @@ public sealed class FpcDistributorFastModule : OptimizationModuleBase
 
         if (writeAllConflict)
         {
-            // Coexistence mode (e.g., SimpleAntiCheat patching WriteAll for anti-wallhack):
-            // Leave WriteAll 100% untouched so anti-cheat logic runs with full integrity on all real players,
-            // while safely optimizing non-conflicting parts:
+            // Preserve the existing WriteAll patch and optimize the non-conflicting paths:
             //   1. Skip wasted serialization to DummyNetworkConnection in LateUpdate (DummyNetworkConnection.Send is an empty no-op)
             //   2. Per-frame O(P) target cache + single outer dict lookup in GetNewSyncData (avoids O(P^2) MouseLook/RelativePosition)
             //   3. GetVisibleRole fast-path + PreviouslySent disconnect leak fix

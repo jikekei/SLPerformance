@@ -54,8 +54,8 @@
 4. 插件以 `LoadPriority.Lowest` 最后加载，若检测到 EXILED / AntiCheat 等插件已对同一方法施加冲突 Prefix/Transpiler，默认自动跳过对应模块（`auto_skip_on_harmony_conflict: true`），可通过控制台 `slperf status` 查看每个模块的实际状态。
 
 ### 3.2 真实服务端验证状态
-以下事项已在真实 SCP:SL `14.2.9` + LabAPI `1.1.7.0` + `SimpleAntiCheat` 多插件 48/48 服务端完成现场实测验证（详情见 `BENCHMARKS.md` 第 5 节）：
-1. **Mono 运行时加载、Harmony 共存与不变量核验（已验证）**：18/18 默认模块 `Active`，与 `SimpleAntiCheat`（`WriteAll [Prefix]`、`FpcMotor.Move [Transpiler]`）零冲突共存；`slperf verify` 确认 `FpcStateProcessor.Mask = 0xECC158F9`（`MaskIncludesPlayer = False`），`RoomsByCoords = 99 / 99`。
+以下事项已在真实 SCP:SL `14.2.9` + LabAPI `1.1.7.0` 多插件 48/48 服务端完成现场实测验证（详情见 `BENCHMARKS.md` 第 5 节）：
+1. **Mono 运行时加载与不变量核验（已验证）**：18/18 默认模块 `Active`，`slperf verify` 确认 `FpcStateProcessor.Mask = 0xECC158F9`（`MaskIncludesPlayer = False`），`RoomsByCoords = 99 / 99`。
 2. **三轮 48/48 满载剖面与单模块 A/B 对照（已验证）**：主线程均值 `11.77ms -> 7.13ms`（`-39.4%`），P99 帧 `16.69ms` / Max `16.92ms`（60.00 TPS），`C# LateUpdate` `-80.4%`，GC 分配 `-81.6%`（间隔 `3.35s -> 16.64s`）；单变量实测确认 `OPT-18` 净省 `-1.22ms`、`OPT-16` 维持默认关闭。
 3. **`OPT-21` 大规模切角色实服实测（v1 -> v4 已实测，v5 待实测）**：
    - 48/48 冷开局 Round 1 最大帧：`365~427ms`（无 OPT-21）-> `315.35ms`（v2）-> `224.60ms`（v3，`CreateItem = 5.45ms [Hit 86/86]`，`PoolMiss = 0`）；
