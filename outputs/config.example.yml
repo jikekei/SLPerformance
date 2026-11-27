@@ -1,0 +1,121 @@
+# SLPerformance LabAPI Plugin Configuration Example
+# Target: SCP: Secret Laboratory Dedicated Server 14.2.9 (LabAPI 1.1.7+)
+# Deployment:
+#   1. Place SLPerformance.dll in your LabAPI plugins/ folder (e.g., global/ or <port>/).
+#   2. Ensure 0Harmony.dll (2.4.2+) is present in your LabAPI dependencies/ folder.
+#   3. Every optimization module can be toggled independently here or live via `slperf toggle <moduleId>`.
+
+# Master switch for SLPerformance.
+enabled: true
+
+# Enable verbose diagnostic logging.
+debug: false
+
+# Automatically skip a module if another plugin (e.g., EXILED or AntiCheat) has already
+# applied conflicting Harmony Prefix/Transpiler patches to the same target method.
+auto_skip_on_harmony_conflict: true
+
+# Enable low-overhead Unity PlayerLoop frame timing, GC, and network profiler.
+enable_profiler: true
+
+# Enable per-hotspot method timing probes at startup (toggle live with `slperf probes on|off`).
+enable_method_probes: false
+
+# --- Tier 1 Modules (High ROI, exact behavior equivalence, low risk) ---
+
+# OPT-01: Pack RpcMessage once instead of P+1 times in Mirror.NetworkBehaviour.SendRPCInternal.
+net_mirror_rpc_pack_once: true
+
+# OPT-02: O(P) tick snapshot, single ValidateVisibility, GetVisibleRole short-circuit,
+# lazy EventArgs, and PreviouslySent disconnect leak fix in FpcServerPositionDistributor.
+net_fpc_distributor_fast: true
+
+# OPT-03: Entity-first O(E + D*P) dirty sweep & single EntityStateMessage pack in NetworkServer.Broadcast.
+net_mirror_dirty_broadcast: true
+
+# OPT-04: Direct main-thread LateUpdate Host.PollEvents() (removes 30ms NetworkPollThread jitter & per-packet closures).
+net_transport_direct_poll: true
+
+# OPT-05: VoiceTransceiver lazy EventArgs and single-pack per distinct output VoiceChatChannel.
+net_voice_batch_and_lazy_args: true
+
+# OPT-06: Cache immutable Delegate[] invocation lists in LabAPI event dispatch via ConditionalWeakTable.
+memory_lab_api_event_cache: true
+
+# OPT-07: Pre-index PlayerEffectsController modifier interfaces (replaces 40-element scans & VisionInformation LINQ).
+entities_effects_interface_index: true
+
+# OPT-08: SCP-096 empty marker closure skip + already-targeted raycast skip, SCP-173 dirty-only RPC, darkness short-circuit.
+physics_vision_and_scp_trackers: true
+
+# If true, VisionInformation.GetVisionInformation skips CheckIsInDarkness globally when target is not looking.
+# Default false preserves IsInDarkness for any third-party plugin calling GetVisionInformation directly;
+# internal SCP-096 / SCP-173 trackers always short-circuit safely regardless of this setting.
+vision_darkness_short_circuit_global: false
+
+# OPT-15: Empty AhpStat/Inventory fast paths, SyncMode.Private O(1) send, lazy OpusDecoder on dedicated server.
+memory_inventory_stats_opus: true
+
+# OPT-18: On headless dedicated servers, strip 6 client-only character visual subcontrollers
+# (preserving Lookat head hitbox IK) and move character Animators to Unity 6 parallel Job System.
+anim_headless_character_animator: true
+headless_animator_parallel_native: true
+
+# OPT-21: Accelerate mass role changes & wave respawns (amortized role/model pool pre-warming,
+# virgin starting-item reserve buffer, pack-once SendNewRoleInfo + Dummy skip, WaveManager.SyncValues direct send).
+roles_mass_role_change_accel: true
+prewarm_role_pools: true
+prewarm_item_reserve: true
+prewarm_budget_ms_per_frame: 2.0
+
+# OPT-22: Eliminate real-player join & authentication TPS spikes (background ECDH P-384 keypair pool,
+# async BouncyCastle ECDSA/ECDH offload, redundant ServerRoles badge verify skip, in-memory BanHandler cache,
+# NicknameSync compiled Regex cache, single-writer SendSpawnMessage, and `slperf joinstats` profiler).
+auth_join_spike_accel: true
+async_auth_crypto_offload: true
+ecdh_pre_gen_pool_size: 8
+
+# --- Tier 2 Modules (High ROI, medium complexity) ---
+
+# OPT-09: Sleep reflection-verified standard StatusEffectBase components (enabled=false) while Intensity == 0.
+entities_status_effect_sleep: true
+
+# OPT-10: Zero-copy Mirror Batcher flush and in-place Unbatcher receive fast path.
+net_batcher_unbatcher_zero_copy: true
+
+# OPT-11: Skip stationary FpcMotor ground SphereCast, avoid redundant Transform.position write-back & server Quaternion.Lerp.
+physics_fpc_motor_fast_path: true
+
+# OPT-12: Zero-allocation IPv4/IPv6 peer lookup in LiteNetManager.NativeReceiveLogic.
+net_lite_net_peer_lookup_no_alloc: true
+
+# OPT-13: Dead-player room skip, bounded static multi-cell room grid cache, compact active WaypointBase array.
+entities_room_and_waypoint_accel: true
+
+# Hard upper bound on cached static secondary room grid cells.
+max_cached_static_room_coords: 16384
+
+# OPT-14: Static AdminToyBase sleep, Transform.hasChanged fast path, centralized PickupStandardPhysics updater,
+# Hazard SourcePosition hoist & lazy Hazard/Tesla EventArgs.
+entities_admin_toy_pickup_hazard: true
+
+# OPT-19: Sleep idle stationary BasicDoor (BreakableDoor/ElevatorDoor/PryableDoor) and LockerChamber Animators
+# until interacted with, pried, damaged, or repaired.
+entities_idle_world_animator_sleep: true
+
+# OPT-20: Sleep idle RoomLightController, TimedGrenadePickup, and stationary Scp079Camera instances,
+# and skip verified client-only visual Updates/LateUpdates on headless dedicated servers.
+entities_headless_world_sleep: true
+
+# --- Tier 3 Modules (Opt-in experimental parallelism / physics batching) ---
+
+# OPT-16 (Experimental): Batch moving players' ground SphereCasts via Unity SpherecastCommand.ScheduleBatch
+# (auto-verifies FpcStateProcessor.Mask excludes the Player layer before enabling).
+physics_fpc_spherecast_batch: false
+spherecast_batch_min_players: 16
+
+# OPT-17 (Experimental): Parallelize pure-value-type FPC delta encoding on a fixed BoundedWorkerPool (1..4 threads)
+# when player count >= parallel_encode_min_players and no visibility/role hooks are active.
+threading_fpc_parallel_encode: false
+parallel_encode_min_players: 48
+parallel_worker_threads: 2
