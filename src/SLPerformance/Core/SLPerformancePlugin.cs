@@ -23,7 +23,7 @@ public sealed class SLPerformancePlugin : Plugin<SLPerformanceConfig>
     public override string Name => "SLPerformance";
     public override string Description => "Lithium-style native server performance optimization suite for SCP:SL Dedicated Server.";
     public override string Author => "SLPerformance Research";
-    public override Version Version => new Version(1, 0, 0, 0);
+    public override Version Version => new Version(0, 18, 0);
     public override Version RequiredApiVersion => new Version(1, 1, 0);
 
     // Load last so CompatibilityGuard detects any Harmony patches applied earlier by other plugins.

@@ -47,7 +47,6 @@ namespace SLPerformance.Tests;
 internal static class Program
 {
     private const string DefaultManagedDir = @"C:\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed";
-    private const string DefaultHarmonyDir = @"c:\Users\Administrator\Desktop\项目\huanmengyinghecajiang0\PluginDependencies";
 
     private static int _passed;
     private static int _failed;
@@ -99,13 +98,13 @@ internal static class Program
             return null;
         }
 
-        string harmonyCandidate = Path.Combine(DefaultHarmonyDir, shortName + ".dll");
-        if (File.Exists(harmonyCandidate))
+        string harmonyCandidate = Environment.GetEnvironmentVariable("HarmonyDllPath");
+        if (shortName == "0Harmony" && File.Exists(harmonyCandidate))
         {
-            return alc.LoadFromAssemblyPath(harmonyCandidate);
+            return alc.LoadFromAssemblyPath(Path.GetFullPath(harmonyCandidate));
         }
 
-        string managedCandidate = Path.Combine(DefaultManagedDir, shortName + ".dll");
+        string managedCandidate = Path.Combine(Environment.GetEnvironmentVariable("ScpslManagedDir") ?? DefaultManagedDir, shortName + ".dll");
         if (File.Exists(managedCandidate))
         {
             return alc.LoadFromAssemblyPath(managedCandidate);

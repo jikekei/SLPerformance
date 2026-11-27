@@ -6,7 +6,6 @@
     <PlatformTarget>x64</PlatformTarget>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ScpslManagedDir Condition="'$(ScpslManagedDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed</ScpslManagedDir>
-    <HarmonyDllPath Condition="'$(HarmonyDllPath)' == ''">c:\Users\Administrator\Desktop\项目\huanmengyinghecajiang0\PluginDependencies\0Harmony.dll</HarmonyDllPath>
     <NoWarn>$(NoWarn);CS0436;NU1701;NU1702</NoWarn>
   </PropertyGroup>
 

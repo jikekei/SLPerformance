@@ -7,11 +7,10 @@
     <Deterministic>true</Deterministic>
     <AssemblyName>SLPerformance</AssemblyName>
     <RootNamespace>SLPerformance</RootNamespace>
-    <Version>1.0.0.0</Version>
+    <Version>0.18.0</Version>
     <Authors>SLPerformance Research</Authors>
     <Description>Lithium-style native server performance optimization plugin for SCP: Secret Laboratory Dedicated Server.</Description>
     <ScpslManagedDir Condition="'$(ScpslManagedDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed</ScpslManagedDir>
-    <HarmonyDllPath Condition="'$(HarmonyDllPath)' == ''">c:\Users\Administrator\Desktop\项目\huanmengyinghecajiang0\PluginDependencies\0Harmony.dll</HarmonyDllPath>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <NoWarn>$(NoWarn);CS0436</NoWarn>
   </PropertyGroup>
